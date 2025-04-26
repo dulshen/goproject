@@ -15,9 +15,9 @@ type MenuOptionData struct {
 const optionNumberLabel = "#"
 const descriptionLabel = "Description"
 const menuKeyLabel = "key"
-const col1width = 10
-const col2width = 10
-const col3width = 10
+const col1width = 2
+const col2width = 15
+const col3width = 5
 
 func BuildMenu(menuOptions []map[string]string) ([]MenuOptionData, error) {
 
@@ -43,16 +43,27 @@ func BuildMenu(menuOptions []map[string]string) ([]MenuOptionData, error) {
 }
 
 func PrintMenu(menuData []MenuOptionData) (string, error) {
+
+	if len(menuData) <= 0 {
+		return "", errors.New("menuData cannot be empty")
+	}
+
 	var stringBuilder strings.Builder
 
 	stringBuilder.WriteString("Please select an option from the menu below:\n\n")
-	stringBuilder.WriteString(fmt.Sprintf("%*s | %*s | %*s",
-		col1width, optionNumberLabel, col2width, descriptionLabel, col3width, menuKeyLabel))
-	stringBuilder.WriteString("-------------------------------------------------------------------------")
+	stringBuilder.WriteString(fmt.Sprintf("%*s | %*s | %*s\n",
+		col1width, optionNumberLabel, -col2width, descriptionLabel, -col3width, menuKeyLabel))
+
+	totalWidth := col1width + col2width + col3width + 10
+
+	for range totalWidth {
+		stringBuilder.WriteString("-")
+	}
+	stringBuilder.WriteString("\n")
 
 	for _, optionData := range menuData {
-		stringBuilder.WriteString(fmt.Sprintf("%*d | %*s | %*s",
-			col1width, optionData.OptionNumber, col2width, optionData.Description, col3width, optionData.MenuKey))
+		stringBuilder.WriteString(fmt.Sprintf("%*d   %*s   %*s\n",
+			col1width, optionData.OptionNumber, -col2width, optionData.Description, -col3width, optionData.MenuKey))
 	}
 
 	return stringBuilder.String(), nil
