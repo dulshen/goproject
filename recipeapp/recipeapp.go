@@ -3,11 +3,15 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/dulshen/goproject/climenus"
 )
 
 func main() {
+
+	initializeJSONFile(jsonFileName, jsonDirectoryName, false)
+
 	log.SetPrefix("climenu: ")
 	log.SetFlags(0)
 
@@ -47,6 +51,36 @@ func main() {
 		if selection == "add" {
 			AddRecipeLoop()
 		}
+		if selection == "clearAll" {
+			clearAllRecipes()
+		}
+	}
+}
+
+func clearAllRecipes() error {
+
+	countConfirms := 0
+	fmt.Println("This will delete all recipes saved so far. Are you sure? (Y/N)")
+
+	for countConfirms < 2 {
+		var input string
+		_, err := fmt.Scan(&input)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if strings.ToLower(input) == "n" {
+			return nil
+		} else {
+			countConfirms++
+			if countConfirms == 1 {
+				fmt.Println("Enter Y once more to proceed with deleting all recipes. (Y/N)")
+			}
+		}
 	}
 
+	initializeJSONFile(jsonFileName, jsonDirectoryName, true)
+
+	return nil
 }

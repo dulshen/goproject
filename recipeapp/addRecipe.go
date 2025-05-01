@@ -9,9 +9,9 @@ import (
 	"strings"
 )
 
-const maxRecipeLength = 50
+const maxRecipeNameLength = 50
 
-const jsonFileName = "../data/recipes.json"
+// const jsonFileName = "../data/recipes.json"
 
 // struct describing a recipe
 type Recipe struct {
@@ -44,8 +44,8 @@ func getRecipeName() (string, error) {
 	scanner.Scan()
 	name := scanner.Text()
 
-	if len(name) > maxRecipeLength {
-		errorStr := fmt.Sprintf("max length for recipe name is %d characters", maxRecipeLength)
+	if len(name) > maxRecipeNameLength {
+		errorStr := fmt.Sprintf("max length for recipe name is %d characters", maxRecipeNameLength)
 		return "", errors.New(errorStr)
 	}
 
