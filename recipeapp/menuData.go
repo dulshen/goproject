@@ -7,6 +7,7 @@ const add = "add"
 const view = "view"
 const edit = "edit"
 const del = "del"
+const exit = "exit"
 
 // maps menuKeys to their respective description
 var mapKeyToDescriptions = map[string]string{
@@ -14,6 +15,7 @@ var mapKeyToDescriptions = map[string]string{
 	view: "View Recipe",
 	edit: "Edit Recipe",
 	del:  "Delete Recipe",
+	exit: "Exit Application",
 }
 
 // map containing descriptions of each menu option, as well as a menuKey for each option
@@ -22,4 +24,5 @@ var mainMenuOptions = []map[string]string{
 	{desc: mapKeyToDescriptions[view], menuKey: view},
 	{desc: mapKeyToDescriptions[edit], menuKey: edit},
 	{desc: mapKeyToDescriptions[del], menuKey: del},
+	{desc: mapKeyToDescriptions[exit], menuKey: exit},
 }
