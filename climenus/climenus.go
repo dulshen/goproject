@@ -18,7 +18,7 @@ const optionNumberLabel = "#"
 const descriptionLabel = "Description"
 const menuKeyLabel = "key"
 const col1width = 2
-const col2width = 15
+const col2width = 20
 const col3width = 5
 
 // Builds a menu in the form of a slice of MenuOptionData, from a slice of maps of strings to strings

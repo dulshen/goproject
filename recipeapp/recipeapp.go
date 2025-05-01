@@ -3,11 +3,15 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/dulshen/goproject/climenus"
 )
 
 func main() {
+
+	initializeJSONFile(jsonFileName, jsonDirectoryName, false)
+
 	log.SetPrefix("climenu: ")
 	log.SetFlags(0)
 
@@ -23,47 +27,60 @@ func main() {
 		log.Fatal("failed to print menu")
 	}
 
-	fmt.Print(menuString)
-
 	var selection string
 
-	isInput := false
+	for selection != "exit" {
+		fmt.Print(menuString)
+		isInput := false
+		for !isInput {
+			_, err = fmt.Scan(&selection)
 
-	for !isInput {
-		_, err = fmt.Scan(&selection)
+			if err == nil {
+				selection, err = climenus.MakeSelection(menuData, selection)
+			}
 
-		if err == nil {
-			selection, err = climenus.MakeSelection(menuData, selection)
+			if err != nil {
+				fmt.Println("Selection does not exist. Please enter a valid selection.")
+			} else {
+				isInput = true
+			}
 		}
+
+		// fmt.Print(selection)
+
+		if selection == "add" {
+			AddRecipeLoop()
+		}
+		if selection == "clearAll" {
+			clearAllRecipes()
+		}
+	}
+}
+
+func clearAllRecipes() error {
+
+	countConfirms := 0
+	fmt.Println("This will delete all recipes saved so far. Are you sure? (Y/N)")
+
+	for countConfirms < 2 {
+		var input string
+		_, err := fmt.Scan(&input)
 
 		if err != nil {
-			fmt.Println("Selection does not exist. Please enter a valid selection.")
+			log.Fatal(err)
+		}
+
+		if strings.ToLower(input) == "n" {
+			return nil
 		} else {
-			isInput = true
+			countConfirms++
+			if countConfirms == 1 {
+				fmt.Println("Enter Y once more to proceed with deleting all recipes. (Y/N)")
+			}
 		}
 	}
 
-	// fmt.Print(selection)
+	initializeJSONFile(jsonFileName, jsonDirectoryName, true)
 
-	if selection == "add" {
-		PrintAddInstructions()
-
-		// var input string
-
-		// _, err = fmt.Scan(&input)
-
-		// if err == nil {
-		// 	fmt.Println("error")
-		// }
-
-		ingredient, err := ParseIngredient()
-
-		if err == nil {
-			fmt.Printf("ingredient: %v, quantity: %v, unit: %v", ingredient.name, ingredient.quantity, ingredient.unit)
-		} else {
-			fmt.Print(err)
-		}
-
-	}
-
+	return nil
 }
