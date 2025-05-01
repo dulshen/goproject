@@ -51,6 +51,9 @@ func main() {
 		if selection == "add" {
 			AddRecipeLoop()
 		}
+		if selection == "view" {
+			viewRecipe(jsonFileName)
+		}
 		if selection == "clearAll" {
 			clearAllRecipes()
 		}
