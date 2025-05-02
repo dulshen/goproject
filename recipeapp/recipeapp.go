@@ -8,6 +8,19 @@ import (
 	"github.com/dulshen/goproject/climenus"
 )
 
+// struct describing a recipe
+type Recipe struct {
+	Name        string       // name of the recipe
+	Ingredients []Ingredient // ingredients list
+}
+
+// struct describing an Ingredient
+type Ingredient struct {
+	Name     string // name of the ingredient
+	Quantity int    // quantity of the ingredient
+	Unit     string // unit of quantity
+}
+
 func main() {
 
 	initializeJSONFile(jsonFileName, jsonDirectoryName, false)
@@ -52,7 +65,12 @@ func main() {
 			AddRecipeLoop()
 		}
 		if selection == "view" {
-			viewRecipe(jsonFileName)
+			isDeleteMode := false
+			SelectRecipeMenu(jsonFileName, isDeleteMode)
+		}
+		if selection == "del" {
+			isDeleteMode := true
+			SelectRecipeMenu(jsonFileName, isDeleteMode)
 		}
 		if selection == "clearAll" {
 			clearAllRecipes()

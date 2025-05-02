@@ -13,19 +13,6 @@ const maxRecipeNameLength = 50
 
 // const jsonFileName = "../data/recipes.json"
 
-// struct describing a recipe
-type Recipe struct {
-	Name        string       // name of the recipe
-	Ingredients []Ingredient // ingredients list
-}
-
-// struct describing an Ingredient
-type Ingredient struct {
-	Name     string // name of the ingredient
-	Quantity int    // quantity of the ingredient
-	Unit     string // unit of quantity
-}
-
 // Prints the instructions for the Add Recipe option
 func printAddInstructions() {
 	fmt.Println("\nPlease enter recipe ingredients in the following format:")
@@ -159,7 +146,7 @@ func AddRecipeLoop() {
 		Name:        recipeName,
 		Ingredients: ingredientList,
 	}
-	err = writeJson(&recipe)
+	err = saveRecipe(&recipe)
 
 	if err == nil {
 		fmt.Println("Successfully saved recipe.")
@@ -169,42 +156,27 @@ func AddRecipeLoop() {
 
 }
 
-func writeJson(recipe *Recipe) error {
+func saveRecipe(recipe *Recipe) error {
+	overwrite := false
+	err := addRecipe((*recipe), jsonFileName, overwrite)
 
-	existingRecipesPtr, err := readRecipesJSON(jsonFileName)
-
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	existingRecipes := *existingRecipesPtr
-
-	recipeIsAdded := false
-
-	for i, oldRecipe := range existingRecipes {
-		if oldRecipe.Name == recipe.Name {
-			fmt.Printf("A recipe with name %s already exists. Overwrite this recipe? (Y/N)\n", recipe.Name)
-			choice := ""
-
-			for choice != "n" && choice != "y" {
-				fmt.Scan(&choice)
-				if strings.ToLower(choice) == "n" {
-					return errors.New("aborted creating new recipe due to conflicting recipe name")
-				} else if strings.ToLower(choice) == "y" {
-					existingRecipes[i].Ingredients = recipe.Ingredients
-					recipeIsAdded = true
+	if errors.Is(err, errRecipeAlreadyExists) {
+		fmt.Printf("A recipe with name %s already exists. Overwrite this recipe? (Y/N)\n", recipe.Name)
+		choice := ""
+		for choice != "n" && choice != "y" {
+			fmt.Scan(&choice)
+			choice = strings.ToLower(choice)
+			if choice == "n" {
+				return errors.New("aborted creating new recipe due to conflicting recipe name")
+			} else if choice == "y" {
+				overwrite = true
+				err = addRecipe((*recipe), jsonFileName, overwrite)
+				if err != nil {
+					return err
 				}
 			}
 		}
 	}
-
-	updatedRecipes := existingRecipes
-
-	if !recipeIsAdded {
-		updatedRecipes = append(updatedRecipes, *recipe)
-	}
-
-	writeRecipesJSON(jsonFileName, &updatedRecipes)
 
 	return nil
 }

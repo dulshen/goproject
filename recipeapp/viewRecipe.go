@@ -7,21 +7,12 @@ import (
 	"github.com/dulshen/goproject/climenus"
 )
 
-// Presents a CLI menu for user to view a recipe, selected from the
-// recipes located in the specified file
-func viewRecipe(filename string) error {
-
-	recipes, err := readRecipesJSON(filename)
-	if err != nil {
-		return err
-	}
-
-	viewMenuData, err := buildViewRecipeMenu(recipes)
-	if err != nil {
-		return err
-	}
-
-	menuString, err := climenus.PrintMenu(*viewMenuData)
+// Presents a CLI menu for user to view or delete a recipe, selected from the
+// recipes located in the specified file.
+// isDeleteMode is a bool representing if this function was called as part of
+// delete recipe function
+func SelectRecipeMenu(filename string, isDeleteMode bool) error {
+	recipes, viewMenuData, menuString, err := recipesAndMenuData(filename)
 	if err != nil {
 		return err
 	}
@@ -38,7 +29,7 @@ func viewRecipe(filename string) error {
 			if err == nil {
 				selection, err = climenus.MakeSelection(*viewMenuData, selection)
 			}
-
+			// if err for either scanning or MakeSelection, then wasn't a valid selection
 			if err != nil {
 				fmt.Println("Selection does not exist. Please enter a valid selection.")
 			} else {
@@ -47,10 +38,24 @@ func viewRecipe(filename string) error {
 		}
 		// skip printing recipe if user selected to go back, just exit loop instead
 		if selection != "back" {
-			printRecipe(recipes, selection)
+			if !isDeleteMode {
+				err = viewRecipe(recipes, selection)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+			} else {
+				err = deleteRecipe(recipes, viewMenuData, selection)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+				// if action is deleteRecipe then need to reread list each time in case list changed
+				recipes, viewMenuData, menuString, err = recipesAndMenuData(filename)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+			}
 		}
 	}
-
 	return nil
 }
 
@@ -99,14 +104,18 @@ func scaleRecipe(recipe Recipe) error {
 
 // Prints the recipe that was selected to be viewed by the user.
 // Selection argument is a string representing the option number of the recipe.
-func printRecipe(recipes *[]Recipe, selection string) error {
+func viewRecipe(recipes *[]Recipe, selection string) error {
 	selectionInt, err := strconv.Atoi(selection)
 
 	if err != nil {
 		return err
 	}
 
-	recipe := (*recipes)[selectionInt-1]
+	// recipe := (*recipes)[selectionInt-1]
+	recipe, err := getRecipe(selectionInt-1, jsonFileName)
+	if err != nil {
+		return err
+	}
 
 	fmt.Printf("\nRecipe: %s\n", recipe.Name)
 	fmt.Println("----------------------------------")
@@ -130,4 +139,25 @@ func printRecipe(recipes *[]Recipe, selection string) error {
 	}
 
 	return nil
+}
+
+// function used to get list of recipes, CLI menu data, and a CLI menu string by reading the recipes
+// data form the JSON file and parsing the data from this
+func recipesAndMenuData(filename string) (*[]Recipe, *[]climenus.MenuOptionData, string, error) {
+	recipes, err := readRecipesJSON(filename)
+	if err != nil {
+		return nil, nil, "", err
+	}
+
+	viewMenuData, err := buildViewRecipeMenu(recipes)
+	if err != nil {
+		return nil, nil, "", err
+	}
+
+	menuString, err := climenus.PrintMenu(*viewMenuData)
+	if err != nil {
+		return nil, nil, "", err
+	}
+
+	return recipes, viewMenuData, menuString, nil
 }
