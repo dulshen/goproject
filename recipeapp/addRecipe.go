@@ -114,38 +114,22 @@ func AddRecipeLoop() {
 		}
 	}
 
-	// initialize variables for the list of Ingredients
-	// and for current line of user input
-	var input string
-	var ingredientList []Ingredient
-
-	// print instructions for adding ingredients
-	printAddInstructions()
-
-	// loop while user adds ingredients until input == "save"
-	for input != "save" {
-		printSaveUndoReminder()
-
-		var ingredient Ingredient
-		ingredient, input, err = ParseIngredient(&ingredientList)
-
-		if err == nil {
-			if input != "save" && input != "undo" {
-				fmt.Printf("Added ingredient: %v, quantity: %v, unit: %v\n", ingredient.Name, ingredient.Quantity, ingredient.Unit)
-			} else if input == "undo" {
-				removeLastIngredient(&ingredientList)
-			}
-
-		} else {
-			fmt.Println(err)
-		}
-	}
-
-	// write the new recipe to JSON file
 	recipe := Recipe{
-		Name:        recipeName,
-		Ingredients: ingredientList,
+		Name: recipeName,
 	}
+
+	ingredientsInputLoop(&recipe)
+
+	// // initialize variables for the list of Ingredients
+	// // and for current line of user input
+	// var input string
+	// var ingredientList []Ingredient
+
+	// // write the new recipe to JSON file
+	// recipe := Recipe{
+	// 	Name:        recipeName,
+	// 	Ingredients: ingredientList,
+	// }
 	err = saveRecipe(&recipe)
 
 	if err == nil {
@@ -155,6 +139,103 @@ func AddRecipeLoop() {
 	}
 
 }
+
+func ingredientsInputLoop(recipe *Recipe) {
+	// print instructions for adding ingredients
+	printAddInstructions()
+
+	var input string
+
+	// loop while user adds ingredients until input == "save"
+	for input != "save" {
+		printSaveUndoReminder()
+
+		input = ingredientInput()
+		ingredient, err := parseIngredient(input)
+
+		if err != nil {
+			fmt.Println(err.Error())
+		} else {
+			recipe.Ingredients = append(recipe.Ingredients, ingredient)
+			fmt.Printf("Added ingredient: %v, quantity: %v, unit: %v\n", ingredient.Name, ingredient.Quantity, ingredient.Unit)
+		}
+
+		// var ingredient Ingredient
+		// ingredient, input, err := ParseIngredient(&ingredientList)
+
+		// if err == nil {
+		// 	if input != "save" && input != "undo" {
+		// 		fmt.Printf("Added ingredient: %v, quantity: %v, unit: %v\n", ingredient.Name, ingredient.Quantity, ingredient.Unit)
+		// 	} else if input == "undo" {
+		// 		removeLastIngredient(&ingredientList)
+		// 	}
+
+		// } else {
+		// 	fmt.Println(err)
+		// }
+	}
+}
+
+func ingredientInput() string {
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+	input := scanner.Text()
+
+	return input
+
+	// if input == "save" || input == "undo" {
+	// 	return Ingredient{}, input, nil
+	// }
+
+	// ingredient, err := parseIngredient(input)
+
+	// if err != nil {
+	// 	return Ingredient{}, "", err
+	// }
+
+	// return ingredient, "", nil
+}
+
+func parseIngredient(ingredientString string) (Ingredient, error) {
+	items := strings.Split(ingredientString, ",")
+
+	if len(items) > 3 || len(items) < 2 {
+		return Ingredient{}, errors.New("must enter either ingredient, quantity or ingredient, quantity, unit")
+	}
+
+	name := strings.TrimSpace(items[0])
+	quantity, err := strconv.Atoi(strings.TrimSpace(items[1]))
+	if err != nil {
+		return Ingredient{}, errors.New("ingredient quantity must be an integer")
+	}
+
+	unit := ""
+	if len(items) == 3 {
+		unit = strings.TrimSpace(items[2])
+	}
+
+	ingredientData := Ingredient{
+		Name:     name,
+		Quantity: quantity,
+		Unit:     unit,
+	}
+
+	// *ingredientsList = append(*ingredientsList, ingredientData)
+
+	return ingredientData, nil
+}
+
+// func addIngredient(recipe *Recipe, ingredientStr string) error {
+
+// 	ingredient, err := ParseIngredient(ingredientStr)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	recipe.Ingredients = append(recipe.Ingredients, ingredient)
+
+// 	return nil
+// }
 
 func saveRecipe(recipe *Recipe) error {
 	overwrite := false

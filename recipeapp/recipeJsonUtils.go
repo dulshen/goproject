@@ -74,6 +74,24 @@ func addRecipe(recipe Recipe, filename string, overwrite bool) error {
 	return nil
 }
 
+func replaceRecipe(recipe Recipe, filename string, index int) error {
+	recipes, err := readRecipesJSON(filename)
+
+	if err != nil {
+		return err
+	}
+
+	if !isValidIndex(index, recipes) {
+		return errors.New("replaceRecipe: index out of range")
+	}
+
+	(*recipes)[index] = recipe
+
+	writeRecipesJSON(filename, recipes)
+
+	return nil
+}
+
 // checks if a provided index for recipe list is valid
 func isValidIndex(index int, recipes *[]Recipe) bool {
 	if index < 0 || index > len(*recipes)-1 {
