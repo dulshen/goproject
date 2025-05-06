@@ -51,11 +51,6 @@ func ParseIngredient(ingredientsList *[]Ingredient) (Ingredient, string, error) 
 		return Ingredient{}, input, nil
 	}
 
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return Ingredient{}, errors.New("ingredient format error (use format: Ingredient name, ingredient quantity, ingredient unit)")
-	// }
-
 	items := strings.Split(input, ",")
 
 	if len(items) > 3 || len(items) < 2 {
@@ -120,16 +115,6 @@ func AddRecipeLoop() {
 
 	ingredientsInputLoop(&recipe)
 
-	// // initialize variables for the list of Ingredients
-	// // and for current line of user input
-	// var input string
-	// var ingredientList []Ingredient
-
-	// // write the new recipe to JSON file
-	// recipe := Recipe{
-	// 	Name:        recipeName,
-	// 	Ingredients: ingredientList,
-	// }
 	err = saveRecipe(&recipe)
 
 	if err == nil {
@@ -159,20 +144,6 @@ func ingredientsInputLoop(recipe *Recipe) {
 			recipe.Ingredients = append(recipe.Ingredients, ingredient)
 			fmt.Printf("Added ingredient: %v, quantity: %v, unit: %v\n", ingredient.Name, ingredient.Quantity, ingredient.Unit)
 		}
-
-		// var ingredient Ingredient
-		// ingredient, input, err := ParseIngredient(&ingredientList)
-
-		// if err == nil {
-		// 	if input != "save" && input != "undo" {
-		// 		fmt.Printf("Added ingredient: %v, quantity: %v, unit: %v\n", ingredient.Name, ingredient.Quantity, ingredient.Unit)
-		// 	} else if input == "undo" {
-		// 		removeLastIngredient(&ingredientList)
-		// 	}
-
-		// } else {
-		// 	fmt.Println(err)
-		// }
 	}
 }
 
@@ -182,18 +153,6 @@ func ingredientInput() string {
 	input := scanner.Text()
 
 	return input
-
-	// if input == "save" || input == "undo" {
-	// 	return Ingredient{}, input, nil
-	// }
-
-	// ingredient, err := parseIngredient(input)
-
-	// if err != nil {
-	// 	return Ingredient{}, "", err
-	// }
-
-	// return ingredient, "", nil
 }
 
 func parseIngredient(ingredientString string) (Ingredient, error) {
@@ -220,22 +179,8 @@ func parseIngredient(ingredientString string) (Ingredient, error) {
 		Unit:     unit,
 	}
 
-	// *ingredientsList = append(*ingredientsList, ingredientData)
-
 	return ingredientData, nil
 }
-
-// func addIngredient(recipe *Recipe, ingredientStr string) error {
-
-// 	ingredient, err := ParseIngredient(ingredientStr)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	recipe.Ingredients = append(recipe.Ingredients, ingredient)
-
-// 	return nil
-// }
 
 func saveRecipe(recipe *Recipe) error {
 	overwrite := false
