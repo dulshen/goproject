@@ -65,12 +65,17 @@ func main() {
 			AddRecipeLoop()
 		}
 		if selection == "view" {
-			isDeleteMode := false
-			SelectRecipeMenu(jsonFileName, isDeleteMode)
+			viewRecipeMenu(jsonFileName)
+			// isDeleteMode := false
+			// SelectRecipeMenu(jsonFileName, isDeleteMode)
+		}
+		if selection == "edit" {
+			editRecipesMenu(jsonFileName)
 		}
 		if selection == "del" {
-			isDeleteMode := true
-			SelectRecipeMenu(jsonFileName, isDeleteMode)
+			deleteRecipeMenu(jsonFileName)
+			// isDeleteMode := true
+			// SelectRecipeMenu(jsonFileName, isDeleteMode)
 		}
 		if selection == "clearAll" {
 			clearAllRecipes()
