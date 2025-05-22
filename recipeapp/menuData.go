@@ -1,31 +1,10 @@
 package main
 
-const desc = "description"
-const menuKey = "menuKey"
-
-const add = "add"
-const view = "view"
-const edit = "edit"
-const del = "del"
-const clear = "clearAll"
 const exit = "exit"
 
-// maps menuKeys to their respective description
-var mapKeyToDescriptions = map[string]string{
-	add:   "Add Recipe",
-	view:  "View Recipe",
-	edit:  "Edit Recipe",
-	del:   "Delete Recipe",
-	clear: "Delete All Recipes",
-	exit:  "Exit Application",
-}
-
-// map containing descriptions of each menu option, as well as a menuKey for each option
-var mainMenuOptions = []map[string]string{
-	{desc: mapKeyToDescriptions[add], menuKey: add},
-	{desc: mapKeyToDescriptions[view], menuKey: view},
-	{desc: mapKeyToDescriptions[edit], menuKey: edit},
-	{desc: mapKeyToDescriptions[del], menuKey: del},
-	{desc: mapKeyToDescriptions[clear], menuKey: clear},
-	{desc: mapKeyToDescriptions[exit], menuKey: exit},
-}
+const optionNumberColWidth = 2
+const commandNameColWidth = 5
+const descriptionColWidth = 20
+const optionNumberLabel = "#"
+const commandNameLabel = "Name"
+const descriptionLabel = "Description"
