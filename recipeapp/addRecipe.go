@@ -77,7 +77,7 @@ const undoIngredientInput = "undo"
 
 func AddRecipeLoop(args []string) error {
 
-	if len(args) > 0 {
+	if len(args) > 1 {
 		return errors.New("invalid command")
 	}
 

@@ -122,8 +122,9 @@ func initializeMenu() *climenus.Menu {
 	menu.Columns = append(menu.Columns, optionNumberCol, commandNameCol, descriptionCol)
 
 	registerAddRecipeCommand(&menu)
-	registerExitCommand(&menu)
 	registerViewRecipeCommand(&menu)
+	registerDeleteRecipeCommand(&menu)
+	registerExitCommand(&menu)
 
 	return &menu
 }
