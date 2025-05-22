@@ -123,6 +123,7 @@ func initializeMenu() *climenus.Menu {
 
 	registerAddRecipeCommand(&menu)
 	registerExitCommand(&menu)
+	registerViewRecipeCommand(&menu)
 
 	return &menu
 }

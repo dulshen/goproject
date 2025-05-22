@@ -14,7 +14,8 @@ const StringType = "string"
 const IntType = "int"
 const FloatType = "float"
 
-const ExitProgram = "Exit Program"
+const ExitProgram = "Exit Program Command Issued"
+const BackCommand = "Back Command Issued"
 
 // struct representing a CLI Menu
 type Menu struct {
@@ -125,6 +126,9 @@ func (menu *Menu) Command(commandString string) (*Command, error) {
 // checks if the provided input matches a valid command name,
 // or if it matches a valid command number.
 func (menu *Menu) commandValidator(commandString string) (bool, error) {
+	if commandString == "back" {
+		return true, nil
+	}
 	// strings := strings.Split(commandString, " ")
 	// if len(strings) > 1 {
 	// 	return false, errors.New("this command does not support additional arguments")
@@ -147,6 +151,14 @@ func (menu *Menu) commandValidator(commandString string) (bool, error) {
 	return true, nil
 }
 
+func BackFunc([]string) error {
+	return fmt.Errorf(BackCommand)
+}
+
+func ExitFunc([]string) error {
+	return fmt.Errorf(ExitProgram)
+}
+
 // main loop for a CLI menu, takes user input until a valid command
 // is issued or user elects to go back or exit the program
 func (menu *Menu) MenuLoop() error {
@@ -158,10 +170,12 @@ func (menu *Menu) MenuLoop() error {
 		// prompts := []string{""}
 		// validators := []func(string, []string) (bool, error){menu.commandValidator}
 		input := UserInput("", menu.commandValidator)
-		inputStrings := strings.Split(input, " ")
-		commandString = inputStrings[0]
+		// inputStrings := strings.Split(input, " ")
+		args := strings.Split(input, " ")
+		// commandString = inputStrings[0]
+		commandString = args[0]
 		command, err := menu.Command(commandString)
-		args := inputStrings[1:]
+		// args := inputStrings[1:]
 
 		if err != nil {
 			fmt.Println(err.Error())
@@ -169,14 +183,13 @@ func (menu *Menu) MenuLoop() error {
 			err := command.Execute(args)
 			if err != nil && err.Error() == ExitProgram {
 				return err
+			} else if err != nil && err.Error() == BackCommand {
+				return nil
 			} else if err != nil {
+				// fmt.Println("debug1")
 				fmt.Println(err.Error())
 			}
 		}
-	}
-
-	if commandString == "exit" {
-		return errors.New("exit command issued")
 	}
 
 	// else command was "back", so just return
