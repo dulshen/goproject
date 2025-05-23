@@ -9,7 +9,7 @@ import (
 // could consider refactoring so that Exec functions pass a pointer to the current menu instead
 var selectRecipeMenu *climenus.Menu
 
-func selectRecipeLoop(executeFunc func([]string) error, instructions string) (*climenus.Menu, error) {
+func selectRecipeLoop(executeFunc func([]string, *climenus.Menu) error, instructions string) (*climenus.Menu, error) {
 	var menu climenus.Menu
 	selectRecipeMenu = &menu
 	recipes, err := readRecipesJSON(jsonFileName)
@@ -58,7 +58,9 @@ func selectRecipeLoop(executeFunc func([]string) error, instructions string) (*c
 	// return nil
 }
 
-func InitializeSelectRecipeCommands(menu *climenus.Menu, recipes *[]Recipe, executeFunc func([]string) error) error {
+func InitializeSelectRecipeCommands(
+	menu *climenus.Menu, recipes *[]Recipe, executeFunc func([]string, *climenus.Menu) error,
+) error {
 	menu.Commands = []*climenus.Command{}
 	menu.CommandsMap = map[string]*climenus.Command{}
 

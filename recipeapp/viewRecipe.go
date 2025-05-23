@@ -8,28 +8,37 @@ import (
 	"github.com/dulshen/goproject/climenus"
 )
 
+const viewName = "view"
+const viewDescr = "View a Recipe"
+
 func registerViewRecipeCommand(menu *climenus.Menu) {
-	c := climenus.Command{Name: view, Description: "View a Recipe", Execute: viewRecipeLoop}
+	c := climenus.Command{Name: viewName, Description: viewDescr, Execute: viewRecipeLoop}
 	menu.AddCommand(&c)
 }
 
 func viewRecipeLoop(args []string) error {
-	menu, err := selectRecipeMenu(viewRecipe)
-	menu.Instructions = "Please choose a recipe to view" +
+	instructions := "Please choose a recipe to view" +
 		"---------------------------------"
+	_, err := selectRecipeLoop(viewRecipe, instructions)
 	if err != nil {
 		return err
 	}
+	// menu.Instructions = "Please choose a recipe to view" +
+	// 	"---------------------------------"
+	// if err != nil {
+	// 	return err
+	// }
 
-	err = menu.ShowMenu()
-	if err != nil {
-		return err
-	}
+	// err = menu.ShowMenu()
+	// if err != nil {
+	// 	return err
+	// }
 
-	err = menu.MenuLoop()
-	if err != nil {
-		return err
-	}
+	// err = menu.MenuLoop()
+	// if err != nil {
+	// 	return err
+	// }
+	// return nil
 	return nil
 }
 

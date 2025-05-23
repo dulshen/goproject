@@ -75,7 +75,7 @@ func parseIngredient(ingredientString string) (Ingredient, error) {
 const saveRecipeInput = "save"
 const undoIngredientInput = "undo"
 
-func AddRecipeLoop(args []string) error {
+func AddRecipeLoop(args []string, menu *climenus.Menu) error {
 
 	if len(args) > 1 {
 		return errors.New("invalid command")

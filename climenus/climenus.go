@@ -14,8 +14,8 @@ const StringType = "string"
 const IntType = "int"
 const FloatType = "float"
 
-const ExitProgram = "Exit Program Command Issued"
-const BackCommand = "Back Command Issued"
+const ExitProgram = "exit program command issued"
+const BackCommand = "back command issued"
 
 // struct representing a CLI Menu
 type Menu struct {
@@ -24,7 +24,8 @@ type Menu struct {
 	Columns     []MenuColumn        // slice with specifiers for the columns of this menu
 	// ColWidths []int // slice containing column widths for each column of the menu
 	// Labels []string // slice containing column labels for each column of the menu
-	Instructions string // instructions to print when menu is reached
+	Instructions string      // instructions to print when menu is reached
+	Data         interface{} // field for storing additional data that may need to be accessed by commands
 }
 
 // add a new command to the menu, adds the command to the list of commands
@@ -151,12 +152,12 @@ func (menu *Menu) commandValidator(commandString string) (bool, error) {
 	return true, nil
 }
 
-func BackFunc([]string) error {
-	return fmt.Errorf(BackCommand)
+func BackFunc(args []string, menu *Menu) error {
+	return errors.New(BackCommand)
 }
 
-func ExitFunc([]string) error {
-	return fmt.Errorf(ExitProgram)
+func ExitFunc(args []string, menu *Menu) error {
+	return errors.New(ExitProgram)
 }
 
 // main loop for a CLI menu, takes user input until a valid command
@@ -180,7 +181,7 @@ func (menu *Menu) MenuLoop() error {
 		if err != nil {
 			fmt.Println(err.Error())
 		} else {
-			err := command.Execute(args)
+			err := command.Execute(args, menu)
 			if err != nil && err.Error() == ExitProgram {
 				return err
 			} else if err != nil && err.Error() == BackCommand {
@@ -222,12 +223,17 @@ func (c *MenuColumn) typeFormatString() (string, error) {
 type Command struct {
 	// option number for this command, can be used to select this option
 	// from menu. Value automatically set by AddCommand
-	OptionNumber      int
-	Name              string                    // name of the command, can be used to select this command from menu
-	Description       string                    // longer description of the command
-	AdditionalColumns []string                  // additional columns to print in the menu for this command, if needed
-	Execute           func(args []string) error // function to execute when this command is issued
-	SubMenu           *Menu                     // SubMenu that should be displayed when this command is issued
+	OptionNumber int
+	// name of the command, can be used to select this command from menu
+	Name string
+	// longer description of the command
+	Description string
+	// additional columns to print in the menu for this command, if needed
+	AdditionalColumns []string
+	// function to execute when this command is issued
+	Execute func(args []string, menu *Menu) error
+	// SubMenu that should be displayed when this command is issued
+	SubMenu *Menu
 }
 
 func UserInput(prompt string, validator func(string) (bool, error)) string {

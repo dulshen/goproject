@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"log"
 
 	"github.com/dulshen/goproject/climenus"
@@ -25,16 +24,12 @@ type Ingredient struct {
 }
 
 func registerExitCommand(menu *climenus.Menu) {
-	c := climenus.Command{Name: exit, Description: "Exit Program", Execute: func([]string) error {
-		return errors.New(climenus.ExitProgram)
-	}}
-
-	menu.AddCommand(&c)
+	menu.AddCommand(&climenus.Command{Name: exit, Description: "Exit Program", Execute: climenus.ExitFunc})
 }
 
 func main() {
 
-	// initializeJSONFile(jsonFileName, jsonDirectoryName, false)
+	initializeJSONFile(jsonFileName, jsonDirectoryName, false)
 
 	log.SetPrefix("climenu: ")
 	log.SetFlags(0)
