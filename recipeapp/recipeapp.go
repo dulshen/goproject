@@ -118,6 +118,7 @@ func initializeMenu() *climenus.Menu {
 
 	registerAddRecipeCommand(&menu)
 	registerViewRecipeCommand(&menu)
+	registerEditRecipeCommand(&menu)
 	registerDeleteRecipeCommand(&menu)
 	registerExitCommand(&menu)
 

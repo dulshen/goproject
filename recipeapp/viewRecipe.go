@@ -16,7 +16,7 @@ func registerViewRecipeCommand(menu *climenus.Menu) {
 	menu.AddCommand(&c)
 }
 
-func viewRecipeLoop(args []string) error {
+func viewRecipeLoop(args []string, menu *climenus.Menu) error {
 	instructions := "Please choose a recipe to view" +
 		"---------------------------------"
 	_, err := selectRecipeLoop(viewRecipe, instructions)
@@ -42,7 +42,7 @@ func viewRecipeLoop(args []string) error {
 	return nil
 }
 
-func viewRecipe(args []string) error {
+func viewRecipe(args []string, menu *climenus.Menu) error {
 
 	chosenRecipeNum, err := strconv.Atoi(strings.TrimSpace(args[0]))
 
@@ -60,7 +60,7 @@ func viewRecipe(args []string) error {
 	fmt.Println("----------------------------------")
 
 	for _, ingredient := range recipe.Ingredients {
-		fmt.Printf("%s: %f %s\n", ingredient.Name, ingredient.Quantity, ingredient.Unit)
+		fmt.Printf("%s: %.2f %s\n", ingredient.Name, ingredient.Quantity, ingredient.Unit)
 	}
 
 	fmt.Print("\n\n")
@@ -91,7 +91,7 @@ func scaleRecipe(recipe *Recipe, multiplierString string) (string, error) {
 		return "", err
 	}
 	for _, ingredient := range recipe.Ingredients {
-		scaledRecipeString += fmt.Sprintf("%s: %f %s\n", ingredient.Name,
+		scaledRecipeString += fmt.Sprintf("%s: %.2f %s\n", ingredient.Name,
 			ingredient.Quantity*float32(multiplier), ingredient.Unit)
 	}
 

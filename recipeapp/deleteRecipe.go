@@ -30,7 +30,7 @@ func deleteRecipeLoop(args []string, menu *climenus.Menu) error {
 	return nil
 }
 
-func deleteRecipe(args []string) error {
+func deleteRecipe(args []string, menu *climenus.Menu) error {
 
 	selectionInt, err := strconv.Atoi(args[0])
 	if err != nil {

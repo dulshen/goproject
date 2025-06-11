@@ -59,6 +59,8 @@ func editRecipe(args []string, menu *climenus.Menu) error {
 		return err
 	}
 
+	return nil
+
 }
 
 func initializeEditARecipeMenu(recipe *Recipe) *climenus.Menu {
@@ -66,10 +68,17 @@ func initializeEditARecipeMenu(recipe *Recipe) *climenus.Menu {
 
 	menu.Instructions = "Choose an item from the recipe to edit:"
 	c1 := climenus.MenuColumn{ColWidth: 5, Type: climenus.StringType, Label: optionNumberLabel}
-	c2 := climenus.MenuColumn{ColWidth: 1, Type: climenus.StringType}
-	c3 := climenus.MenuColumn{ColWidth: 40, Type: climenus.StringType, Label: descriptionLabel}
+	c2 := climenus.MenuColumn{ColWidth: -5, Type: climenus.StringType, Label: commandNameLabel}
+	c3 := climenus.MenuColumn{ColWidth: -40, Type: climenus.StringType, Label: descriptionLabel}
 	menu.Columns = append(menu.Columns, c1, c2, c3)
 
+	menu.Data = recipe
+	initializeEditRecipeCommands(&menu, recipe)
+
+	return &menu
+}
+
+func initializeEditRecipeCommands(menu *climenus.Menu, recipe *Recipe) error {
 	menu.AddCommand(&climenus.Command{Name: "", Description: "Recipe Name: " + recipe.Name, Execute: editRecipeName})
 
 	for _, ingredient := range recipe.Ingredients {
@@ -81,7 +90,7 @@ func initializeEditARecipeMenu(recipe *Recipe) *climenus.Menu {
 	menu.AddCommand(&climenus.Command{Name: "save", Description: "Save Recipe", Execute: saveChanges})
 	menu.AddCommand(&climenus.Command{Name: "back", Execute: climenus.BackFunc})
 
-	menu.Data = recipe
+	return nil
 }
 
 func editRecipeName(args []string, menu *climenus.Menu) error {
@@ -90,32 +99,38 @@ func editRecipeName(args []string, menu *climenus.Menu) error {
 		return err
 	}
 
+	prompt := "Provide a new name for this recipe:"
+	input := climenus.UserInput(prompt, recipeNameValidator)
+	recipe.Name = input
+
+	prompt = ""
+
 	return nil
 }
 
 func editRecipeIngredient(args []string, menu *climenus.Menu) error {
-	recipe, err := extractRecipeData(menu)
-	if err != nil {
-		return err
-	}
+	// recipe, err := extractRecipeData(menu)
+	// if err != nil {
+	// 	return err
+	// }
 
 	return nil
 }
 
 func addIngredient(args []string, menu *climenus.Menu) error {
-	recipe, err := extractRecipeData(menu)
-	if err != nil {
-		return err
-	}
+	// recipe, err := extractRecipeData(menu)
+	// if err != nil {
+	// 	return err
+	// }
 
 	return nil
 }
 
 func saveChanges(args []string, menu *climenus.Menu) error {
-	recipe, err := extractRecipeData(menu)
-	if err != nil {
-		return err
-	}
+	// recipe, err := extractRecipeData(menu)
+	// if err != nil {
+	// 	return err
+	// }
 
 	return nil
 }
