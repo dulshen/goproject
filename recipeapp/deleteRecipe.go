@@ -2,52 +2,52 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"strconv"
+
+	"github.com/dulshen/goproject/climenus"
 )
 
-func deleteRecipeMenu(filename string) error {
-	log.SetPrefix("deleteRecipeMenu: ")
+const delName = "del"
+const delDescr = "Delete Recipe"
 
-	recipes, err := readRecipesJSON(filename)
+func registerDeleteRecipeCommand(menu *climenus.Menu) {
+	menu.AddCommand(&climenus.Command{Name: delName, Description: delDescr, Execute: deleteRecipeLoop})
+}
 
+func deleteRecipeLoop(args []string, menu *climenus.Menu) error {
+	instructions := "Please choose a recipe to delete\n" +
+		"---------------------------------"
+	menu, err := selectRecipeLoop(deleteRecipe, instructions)
 	if err != nil {
-		log.Fatal(err.Error())
+		return err
 	}
 
-	var selection string
-	for selection != "back" {
-		selection, err = selectRecipeMenuNew(recipes)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-
-		if selection != "back" {
-			deleteRecipe(selection)
-
-			recipes, err = readRecipesJSON(filename)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-		}
+	_, err = fmt.Println(menu)
+	if err != nil {
+		fmt.Println(err.Error())
 	}
 
 	return nil
 }
 
-// deletes a recipe from the recipes data using the selected index provided by user as a string
-func deleteRecipe(selection string) error {
+func deleteRecipe(args []string, menu *climenus.Menu) error {
 
-	selectionInt, err := strconv.Atoi(selection)
+	selectionInt, err := strconv.Atoi(args[0])
 	if err != nil {
 		return err
 	}
 
-	err = removeRecipe(selectionInt-1, jsonFileName)
-
+	index := selectionInt - 1
+	err = removeRecipe(index, jsonFileName)
 	if err != nil {
 		return err
 	}
+	recipes, err := readRecipesJSON(jsonFileName)
+	if err != nil {
+		return err
+	}
+	// re-initialize the select recipe menu commands list
+	InitializeSelectRecipeCommands(selectRecipeMenu, recipes, deleteRecipe)
 
 	return nil
 }

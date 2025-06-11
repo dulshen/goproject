@@ -1,62 +1,75 @@
 package main
 
 import (
-	"fmt"
-	"strconv"
-
 	"github.com/dulshen/goproject/climenus"
 )
 
-func selectRecipeMenuNew(recipes *[]Recipe) (string, error) {
-	viewMenuData, err := buildSelectRecipeMenu(recipes)
-	if err != nil {
-		return "", err
-	}
+// need to be able to access the menu if deleting a recipe, as this requires
+// reinitializing the menu after recipe is removed
+// could consider refactoring so that Exec functions pass a pointer to the current menu instead
+var selectRecipeMenu *climenus.Menu
 
-	menuString, err := climenus.PrintMenu(*viewMenuData)
-	if err != nil {
-		return "", err
-	}
-
-	var selection string
-	fmt.Print(menuString)
-	isInput := false
-	// loop until valid user input
-	for !isInput {
-		_, err = fmt.Scan(&selection)
-		// check if valid selection
-		if err == nil {
-			selection, err = climenus.MakeSelection(*viewMenuData, selection)
-		}
-		// if err for either scanning or MakeSelection, then wasn't a valid selection
-		if err != nil {
-			fmt.Println("Selection does not exist. Please enter a valid selection.")
-		} else {
-			isInput = true
-		}
-	}
-	return selection, nil
-}
-
-func buildSelectRecipeMenu(recipes *[]Recipe) (*[]climenus.MenuOptionData, error) {
-	var viewMenuOptions []map[string]string
-
-	for i, recipe := range *recipes {
-		option := map[string]string{
-			"description": recipe.Name,
-			"menuKey":     strconv.Itoa(i + 1), // no support for menuKey for view recipe at the moment, just use number
-		}
-		viewMenuOptions = append(viewMenuOptions, option)
-	}
-	// add one more option to menu for going back
-	viewMenuOptions = append(viewMenuOptions, map[string]string{
-		"description": "Return to main menu",
-		"menuKey":     "back",
-	})
-
-	viewMenuData, err := climenus.BuildMenu(viewMenuOptions)
+func selectRecipeLoop(executeFunc func([]string, *climenus.Menu) error, instructions string) (*climenus.Menu, error) {
+	var menu climenus.Menu
+	selectRecipeMenu = &menu
+	recipes, err := readRecipesJSON(jsonFileName)
 	if err != nil {
 		return nil, err
+		// return err
 	}
-	return &viewMenuData, nil
+
+	InitializeSelectRecipeCommands(&menu, recipes, executeFunc)
+
+	// for _, recipe := range *recipes {
+	// 	menu.AddCommand(&climenus.Command{Description: recipe.Name, Name: "", Execute: executeFunc})
+	// }
+
+	// menu.AddCommand(&climenus.Command{Name: "back", Description: "", Execute: climenus.BackFunc})
+	// menu.AddCommand(&climenus.Command{Name: "exit", Description: "Exit Program", Execute: climenus.ExitFunc})
+
+	c1 := climenus.MenuColumn{ColWidth: 5, Label: "#", Type: "string"}
+	c2 := climenus.MenuColumn{ColWidth: 1, Label: "", Type: "string"}
+	c3 := climenus.MenuColumn{ColWidth: -20, Label: "Recipe Name", Type: "string"}
+
+	menu.Columns = append(menu.Columns, c1, c2, c3)
+
+	// if err != nil {
+	// 	return err
+	// }
+
+	menu.Instructions = instructions
+
+	// err = menu.ShowMenu()
+	// if err != nil {
+	// 	return nil, err
+	// 	// return err
+	// }
+
+	// fmt.Println(&menu)
+
+	err = menu.MenuLoop()
+	if err != nil {
+		return nil, err
+		// return err
+	}
+	// return nil
+
+	return &menu, nil
+	// return nil
+}
+
+func InitializeSelectRecipeCommands(
+	menu *climenus.Menu, recipes *[]Recipe, executeFunc func([]string, *climenus.Menu) error,
+) error {
+	menu.Commands = []*climenus.Command{}
+	menu.CommandsMap = map[string]*climenus.Command{}
+
+	for _, recipe := range *recipes {
+		menu.AddCommand(&climenus.Command{Description: recipe.Name, Name: "", Execute: executeFunc})
+	}
+
+	menu.AddCommand(&climenus.Command{Name: "back", Description: "", Execute: climenus.BackFunc})
+
+	return nil
+
 }

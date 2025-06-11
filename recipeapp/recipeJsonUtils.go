@@ -58,6 +58,10 @@ func addRecipe(recipe Recipe, filename string, overwrite bool) error {
 				return errRecipeAlreadyExists
 			} else {
 				(*recipes)[i].Ingredients = recipe.Ingredients
+				err = writeRecipesJSON(jsonFileName, recipes)
+				if err != nil {
+					return err
+				}
 				return nil
 			}
 		}

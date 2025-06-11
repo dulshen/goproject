@@ -1,12 +1,14 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"strings"
 
 	"github.com/dulshen/goproject/climenus"
 )
+
+const mainMenuInstructions = "----------------------------------------------------------\n" +
+	"Please select an option from the menu below:\n" +
+	"-----------------------------------------------------------\n\n"
 
 // struct describing a recipe
 type Recipe struct {
@@ -16,9 +18,13 @@ type Recipe struct {
 
 // struct describing an Ingredient
 type Ingredient struct {
-	Name     string // name of the ingredient
-	Quantity int    // quantity of the ingredient
-	Unit     string // unit of quantity
+	Name     string  // name of the ingredient
+	Quantity float32 // quantity of the ingredient
+	Unit     string  // unit of quantity
+}
+
+func registerExitCommand(menu *climenus.Menu) {
+	menu.AddCommand(&climenus.Command{Name: exit, Description: "Exit Program", Execute: climenus.ExitFunc})
 }
 
 func main() {
@@ -28,85 +34,121 @@ func main() {
 	log.SetPrefix("climenu: ")
 	log.SetFlags(0)
 
-	menuData, err := climenus.BuildMenu(mainMenuOptions)
+	mainMenu := initializeMenu()
 
-	if err != nil {
-		log.Fatal("failed to build menu")
-	}
+	mainMenu.MenuLoop()
 
-	menuString, err := climenus.PrintMenu(menuData)
+	// // mainMenu.AddCommand(&addRecipeCommand)
+	// // menuData, err := climenus.BuildMenu(mainMenuOptions)
 
-	if err != nil {
-		log.Fatal("failed to print menu")
-	}
+	// // if err != nil {
+	// 	// log.Fatal("failed to build menu")
+	// // }
 
-	var selection string
+	// // menuString, err := climenus.PrintMenu(menuData)
 
-	for selection != "exit" {
-		fmt.Print(menuString)
-		isInput := false
-		for !isInput {
-			_, err = fmt.Scan(&selection)
+	// // if err != nil {
+	// // 	log.Fatal("failed to print menu")
+	// // }
 
-			if err == nil {
-				selection, err = climenus.MakeSelection(menuData, selection)
-			}
+	// var selection string
 
-			if err != nil {
-				fmt.Println("Selection does not exist. Please enter a valid selection.")
-			} else {
-				isInput = true
-			}
-		}
+	// for selection != "exit" {
+	// 	fmt.Print(menuString)
+	// 	isInput := false
+	// 	for !isInput {
+	// 		_, err = fmt.Scan(&selection)
 
-		// fmt.Print(selection)
+	// 		if err == nil {
+	// 			selection, err = climenus.MakeSelection(menuData, selection)
+	// 		}
 
-		if selection == "add" {
-			AddRecipeLoop()
-		}
-		if selection == "view" {
-			viewRecipeMenu(jsonFileName)
-			// isDeleteMode := false
-			// SelectRecipeMenu(jsonFileName, isDeleteMode)
-		}
-		if selection == "edit" {
-			editRecipesMenu(jsonFileName)
-		}
-		if selection == "del" {
-			deleteRecipeMenu(jsonFileName)
-			// isDeleteMode := true
-			// SelectRecipeMenu(jsonFileName, isDeleteMode)
-		}
-		if selection == "clearAll" {
-			clearAllRecipes()
-		}
-	}
+	// 		if err != nil {
+	// 			fmt.Println("Selection does not exist. Please enter a valid selection.")
+	// 		} else {
+	// 			isInput = true
+	// 		}
+	// 	}
+
+	// 	// fmt.Print(selection)
+
+	// 	if selection == "add" {
+	// 		AddRecipeLoop()
+	// 	}
+	// 	// if selection == "view" {
+	// 	// 	viewRecipeMenu(jsonFileName)
+	// 	// 	// isDeleteMode := false
+	// 	// 	// SelectRecipeMenu(jsonFileName, isDeleteMode)
+	// 	// }
+	// 	// if selection == "edit" {
+	// 	// 	editRecipesMenu(jsonFileName)
+	// 	// }
+	// 	// if selection == "del" {
+	// 	// 	deleteRecipeMenu(jsonFileName)
+	// 	// 	// isDeleteMode := true
+	// 	// 	// SelectRecipeMenu(jsonFileName, isDeleteMode)
+	// 	// }
+	// 	// if selection == "clearAll" {
+	// 	// 	clearAllRecipes()
+	// 	// }
+	// }
 }
 
-func clearAllRecipes() error {
+func initializeMenu() *climenus.Menu {
+	var menu climenus.Menu
 
-	countConfirms := 0
-	fmt.Println("This will delete all recipes saved so far. Are you sure? (Y/N)")
+	menu.Instructions = mainMenuInstructions
 
-	for countConfirms < 2 {
-		var input string
-		_, err := fmt.Scan(&input)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if strings.ToLower(input) == "n" {
-			return nil
-		} else {
-			countConfirms++
-			if countConfirms == 1 {
-				fmt.Println("Enter Y once more to proceed with deleting all recipes. (Y/N)")
-			}
-		}
+	optionNumberCol := climenus.MenuColumn{
+		ColWidth: optionNumberColWidth,
+		Type:     climenus.StringType,
+		Label:    optionNumberLabel,
+	}
+	commandNameCol := climenus.MenuColumn{
+		ColWidth: commandNameColWidth,
+		Type:     climenus.StringType,
+		Label:    commandNameLabel,
+	}
+	descriptionCol := climenus.MenuColumn{ColWidth: descriptionColWidth,
+		Type:  climenus.StringType,
+		Label: descriptionLabel,
 	}
 
-	initializeJSONFile(jsonFileName, jsonDirectoryName, true)
+	menu.Columns = append(menu.Columns, optionNumberCol, commandNameCol, descriptionCol)
 
-	return nil
+	registerAddRecipeCommand(&menu)
+	registerViewRecipeCommand(&menu)
+	registerEditRecipeCommand(&menu)
+	registerDeleteRecipeCommand(&menu)
+	registerExitCommand(&menu)
+
+	return &menu
 }
+
+// func clearAllRecipes() error {
+
+// 	countConfirms := 0
+// 	fmt.Println("This will delete all recipes saved so far. Are you sure? (Y/N)")
+
+// 	for countConfirms < 2 {
+// 		var input string
+// 		_, err := fmt.Scan(&input)
+
+// 		if err != nil {
+// 			log.Fatal(err)
+// 		}
+
+// 		if strings.ToLower(input) == "n" {
+// 			return nil
+// 		} else {
+// 			countConfirms++
+// 			if countConfirms == 1 {
+// 				fmt.Println("Enter Y once more to proceed with deleting all recipes. (Y/N)")
+// 			}
+// 		}
+// 	}
+
+// 	initializeJSONFile(jsonFileName, jsonDirectoryName, true)
+
+// 	return nil
+// }
