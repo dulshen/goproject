@@ -27,6 +27,8 @@ func registerExitCommand(menu *climenus.Menu) {
 	menu.AddCommand(&climenus.Command{Name: exit, Description: "Exit Program", Execute: climenus.ExitFunc})
 }
 
+// Starts the program
+// initializes the json data storage file if needed, then runs the main menu's loop
 func main() {
 
 	initializeJSONFile(jsonFileName, jsonDirectoryName, false)
@@ -35,65 +37,11 @@ func main() {
 	log.SetFlags(0)
 
 	mainMenu := initializeMenu()
-
 	mainMenu.MenuLoop()
 
-	// // mainMenu.AddCommand(&addRecipeCommand)
-	// // menuData, err := climenus.BuildMenu(mainMenuOptions)
-
-	// // if err != nil {
-	// 	// log.Fatal("failed to build menu")
-	// // }
-
-	// // menuString, err := climenus.PrintMenu(menuData)
-
-	// // if err != nil {
-	// // 	log.Fatal("failed to print menu")
-	// // }
-
-	// var selection string
-
-	// for selection != "exit" {
-	// 	fmt.Print(menuString)
-	// 	isInput := false
-	// 	for !isInput {
-	// 		_, err = fmt.Scan(&selection)
-
-	// 		if err == nil {
-	// 			selection, err = climenus.MakeSelection(menuData, selection)
-	// 		}
-
-	// 		if err != nil {
-	// 			fmt.Println("Selection does not exist. Please enter a valid selection.")
-	// 		} else {
-	// 			isInput = true
-	// 		}
-	// 	}
-
-	// 	// fmt.Print(selection)
-
-	// 	if selection == "add" {
-	// 		AddRecipeLoop()
-	// 	}
-	// 	// if selection == "view" {
-	// 	// 	viewRecipeMenu(jsonFileName)
-	// 	// 	// isDeleteMode := false
-	// 	// 	// SelectRecipeMenu(jsonFileName, isDeleteMode)
-	// 	// }
-	// 	// if selection == "edit" {
-	// 	// 	editRecipesMenu(jsonFileName)
-	// 	// }
-	// 	// if selection == "del" {
-	// 	// 	deleteRecipeMenu(jsonFileName)
-	// 	// 	// isDeleteMode := true
-	// 	// 	// SelectRecipeMenu(jsonFileName, isDeleteMode)
-	// 	// }
-	// 	// if selection == "clearAll" {
-	// 	// 	clearAllRecipes()
-	// 	// }
-	// }
 }
 
+// Initializes the main menu, setting up the columns and registering the commands
 func initializeMenu() *climenus.Menu {
 	var menu climenus.Menu
 
@@ -124,31 +72,3 @@ func initializeMenu() *climenus.Menu {
 
 	return &menu
 }
-
-// func clearAllRecipes() error {
-
-// 	countConfirms := 0
-// 	fmt.Println("This will delete all recipes saved so far. Are you sure? (Y/N)")
-
-// 	for countConfirms < 2 {
-// 		var input string
-// 		_, err := fmt.Scan(&input)
-
-// 		if err != nil {
-// 			log.Fatal(err)
-// 		}
-
-// 		if strings.ToLower(input) == "n" {
-// 			return nil
-// 		} else {
-// 			countConfirms++
-// 			if countConfirms == 1 {
-// 				fmt.Println("Enter Y once more to proceed with deleting all recipes. (Y/N)")
-// 			}
-// 		}
-// 	}
-
-// 	initializeJSONFile(jsonFileName, jsonDirectoryName, true)
-
-// 	return nil
-// }
