@@ -10,24 +10,29 @@ import (
 	"github.com/dulshen/goproject/climenus"
 )
 
+// Struct used for passing necessary data for selected recipe
+// to a climenus.Menu struct, so that this can be accessed by other functions later
 type editARecipeMenuData struct {
-	Recipe    *Recipe
-	RecipeIdx int
+	Recipe    *Recipe // pointer to the recipe for this menu
+	RecipeIdx int     // int indicating the index of this recipe in the list of Recipes in storage
 }
 
 // const recipeNameIdx = "recipe name index"
 // const ingredientsStartIdx = "ingredients start index"
 // const ingredentsEndIdx = "ingredients end index"
 
+// function used to add the Edit Recipe command to the main menu
 func registerEditRecipeCommand(menu *climenus.Menu) {
 	menu.AddCommand(&climenus.Command{Name: "edit", Description: "Edit a Recipe", Execute: editRecipesLoop})
 }
 
+// Main loop for the edit recipes menu, asks the user to select a recipe
+// then calls the edit a recipe menu, passing the selected recipe in args
 func editRecipesLoop(args []string, menu *climenus.Menu) error {
 	instructions := "Please choose a recipe to edit\n" +
 		"---------------------------------"
 
-	_, err := selectRecipeLoop(editRecipe, instructions)
+	err := selectRecipeLoop(editRecipe, instructions)
 	if err != nil {
 		return err
 	}
@@ -35,6 +40,9 @@ func editRecipesLoop(args []string, menu *climenus.Menu) error {
 	return nil
 }
 
+// Determines which recipe the user selected by parsing the selection in args
+// then initializes a menu with options for editing this recipe
+// and calls the menu loop for editing this recipe
 func editRecipe(args []string, menu *climenus.Menu) error {
 	chosenRecipeNum, err := strconv.Atoi(strings.TrimSpace(args[0]))
 	if err != nil {
@@ -72,6 +80,10 @@ func editRecipe(args []string, menu *climenus.Menu) error {
 
 }
 
+// Initializes edit a recipe menu for the selected recipe
+// sets the menu instructions, the column widths and types, and passes the recipe data and index
+// to a struct stored in menu.Data, then calls another function to initialize the commands for the menu
+// returns the initialized menu for editing this recipe
 func initializeEditARecipeMenu(recipe *Recipe, index int) *climenus.Menu {
 	var menu climenus.Menu
 
@@ -87,6 +99,9 @@ func initializeEditARecipeMenu(recipe *Recipe, index int) *climenus.Menu {
 	return &menu
 }
 
+// Initializes (or re-initializes) commands for the edit recipe menu for this recipe
+// adds commands for changing the recipe name, changing any ingredients, adding ingredients,
+// saving the changes, or going back without saving
 func initializeEditRecipeCommands(menu *climenus.Menu, recipe *Recipe) error {
 	menu.Commands = nil
 	menu.CommandsMap = nil
@@ -104,6 +119,8 @@ func initializeEditRecipeCommands(menu *climenus.Menu, recipe *Recipe) error {
 	return nil
 }
 
+// Function used for editing a recipe name. Takes user input for a new name
+// then renames the recipe currently being edited
 func editRecipeName(args []string, menu *climenus.Menu) error {
 	recipe, _, err := extractRecipeData(menu)
 	if err != nil {
@@ -120,6 +137,9 @@ func editRecipeName(args []string, menu *climenus.Menu) error {
 	return nil
 }
 
+// Function used for editing a recipe ingredient. Takes user input for an updated
+// ingredient to use for the selected ingredient (indicated by args), and stores this
+// in the ingredients list for the recipe being edited currently
 func editRecipeIngredient(args []string, menu *climenus.Menu) error {
 	// args[0] will be the option number chosen
 	// idx 1 is recipe name, so recipe ingredients start at idx 2 so adjust by 2 to get 0-indexed
@@ -151,6 +171,8 @@ func editRecipeIngredient(args []string, menu *climenus.Menu) error {
 	return nil
 }
 
+// Function used for adding a recipe ingredient. Takes user input for a new ingredient to add
+// then adds it to the recipe currently being edited
 func addIngredient(args []string, menu *climenus.Menu) error {
 	recipe, _, err := extractRecipeData(menu)
 	if err != nil {
@@ -173,6 +195,10 @@ func addIngredient(args []string, menu *climenus.Menu) error {
 	return nil
 }
 
+// Saves any changes made to the currently selected recipe
+// as of now this is done by replacing the recipe that had been selected for editing
+// with the newly updated recipe, within the JSON data file
+// this can be reworked at a later date when a relational database is added for data storage
 func saveChanges(args []string, menu *climenus.Menu) error {
 	recipe, recipeIdx, err := extractRecipeData(menu)
 	if err != nil {
@@ -191,6 +217,8 @@ func saveChanges(args []string, menu *climenus.Menu) error {
 	return nil
 }
 
+// Extracts a pointer to a recipe struct, and an int indicating the recipe index from
+// the list of recipes, and returns these
 func extractRecipeData(menu *climenus.Menu) (*Recipe, int, error) {
 	menuData, ok := menu.Data.(*editARecipeMenuData)
 	if !ok {
