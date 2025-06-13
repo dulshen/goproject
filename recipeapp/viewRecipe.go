@@ -8,14 +8,21 @@ import (
 	"github.com/dulshen/goproject/climenus"
 )
 
+// menu name for view recipe
 const viewName = "view"
+
+// menu description for view recipe
 const viewDescr = "View a Recipe"
 
+// Function used to register the view recipe command in the main menu
 func registerViewRecipeCommand(menu *climenus.Menu) {
 	c := climenus.Command{Name: viewName, Description: viewDescr, Execute: viewRecipeLoop}
 	menu.AddCommand(&c)
 }
 
+// Main loop for the view recipe menu
+// Makes use of the select recipe loop, which prompts the user
+// to select a recipe to view.
 func viewRecipeLoop(args []string, menu *climenus.Menu) error {
 	instructions := "Please choose a recipe to view" +
 		"---------------------------------"
@@ -23,25 +30,12 @@ func viewRecipeLoop(args []string, menu *climenus.Menu) error {
 	if err != nil {
 		return err
 	}
-	// menu.Instructions = "Please choose a recipe to view" +
-	// 	"---------------------------------"
-	// if err != nil {
-	// 	return err
-	// }
 
-	// err = menu.ShowMenu()
-	// if err != nil {
-	// 	return err
-	// }
-
-	// err = menu.MenuLoop()
-	// if err != nil {
-	// 	return err
-	// }
-	// return nil
 	return nil
 }
 
+// Views the recipe chosen by the user, which is indicated by the index number
+// passed in args. Prints the recipe name, and all of the recipe ingredients.
 func viewRecipe(args []string, menu *climenus.Menu) error {
 
 	chosenRecipeNum, err := strconv.Atoi(strings.TrimSpace(args[0]))
@@ -83,6 +77,8 @@ func viewRecipe(args []string, menu *climenus.Menu) error {
 	return nil
 }
 
+// Scales the recipe currently being viewed by a multiplier value indicated
+// by user input.
 func scaleRecipe(recipe *Recipe, multiplierString string) (string, error) {
 	scaledRecipeString := ""
 
