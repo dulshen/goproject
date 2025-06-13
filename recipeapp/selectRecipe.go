@@ -4,20 +4,14 @@ import (
 	"github.com/dulshen/goproject/climenus"
 )
 
-// need to be able to access the menu if deleting a recipe, as this requires
-// reinitializing the menu after recipe is removed
-// could consider refactoring so that Exec functions pass a pointer to the current menu instead
-var selectRecipeMenu *climenus.Menu
-
 // The main loop for selecting a recipe, used by the view recipe, edit recipe, and delete recipe functions.
 // Prints a list of recipes for the user to select from, then calls the appropriate function (view, edit, delete)
 // as indicated by the executeFunc argument, with the selected recipe index as an argument
-func selectRecipeLoop(executeFunc func([]string, *climenus.Menu) error, instructions string) (*climenus.Menu, error) {
+func selectRecipeLoop(executeFunc func([]string, *climenus.Menu) error, instructions string) error {
 	var menu climenus.Menu
-	selectRecipeMenu = &menu
 	recipes, err := readRecipesJSON(jsonFileName)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	InitializeSelectRecipeCommands(&menu, recipes, executeFunc)
@@ -32,10 +26,10 @@ func selectRecipeLoop(executeFunc func([]string, *climenus.Menu) error, instruct
 
 	err = menu.MenuLoop()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &menu, nil
+	return nil
 
 }
 
