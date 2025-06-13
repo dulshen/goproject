@@ -9,23 +9,18 @@ import (
 // could consider refactoring so that Exec functions pass a pointer to the current menu instead
 var selectRecipeMenu *climenus.Menu
 
+// The main loop for selecting a recipe, used by the view recipe, edit recipe, and delete recipe functions.
+// Prints a list of recipes for the user to select from, then calls the appropriate function (view, edit, delete)
+// as indicated by the executeFunc argument, with the selected recipe index as an argument
 func selectRecipeLoop(executeFunc func([]string, *climenus.Menu) error, instructions string) (*climenus.Menu, error) {
 	var menu climenus.Menu
 	selectRecipeMenu = &menu
 	recipes, err := readRecipesJSON(jsonFileName)
 	if err != nil {
 		return nil, err
-		// return err
 	}
 
 	InitializeSelectRecipeCommands(&menu, recipes, executeFunc)
-
-	// for _, recipe := range *recipes {
-	// 	menu.AddCommand(&climenus.Command{Description: recipe.Name, Name: "", Execute: executeFunc})
-	// }
-
-	// menu.AddCommand(&climenus.Command{Name: "back", Description: "", Execute: climenus.BackFunc})
-	// menu.AddCommand(&climenus.Command{Name: "exit", Description: "Exit Program", Execute: climenus.ExitFunc})
 
 	c1 := climenus.MenuColumn{ColWidth: 5, Label: "#", Type: "string"}
 	c2 := climenus.MenuColumn{ColWidth: 1, Label: "", Type: "string"}
@@ -33,31 +28,18 @@ func selectRecipeLoop(executeFunc func([]string, *climenus.Menu) error, instruct
 
 	menu.Columns = append(menu.Columns, c1, c2, c3)
 
-	// if err != nil {
-	// 	return err
-	// }
-
 	menu.Instructions = instructions
-
-	// err = menu.ShowMenu()
-	// if err != nil {
-	// 	return nil, err
-	// 	// return err
-	// }
-
-	// fmt.Println(&menu)
 
 	err = menu.MenuLoop()
 	if err != nil {
 		return nil, err
-		// return err
 	}
-	// return nil
 
 	return &menu, nil
-	// return nil
+
 }
 
+// Initializes the select recipe menu with commands for each recipe in the recipe data
 func InitializeSelectRecipeCommands(
 	menu *climenus.Menu, recipes *[]Recipe, executeFunc func([]string, *climenus.Menu) error,
 ) error {
