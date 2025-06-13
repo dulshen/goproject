@@ -78,6 +78,8 @@ func addRecipe(recipe Recipe, filename string, overwrite bool) error {
 	return nil
 }
 
+// Replaces a recipe in the recipe data at index provided, using the new
+// recipe that is provided.
 func replaceRecipe(recipe Recipe, filename string, index int) error {
 	recipes, err := readRecipesJSON(filename)
 
