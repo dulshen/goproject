@@ -32,7 +32,7 @@ func editRecipesLoop(args []string, menu *climenus.Menu) error {
 	instructions := "Please choose a recipe to edit\n" +
 		"---------------------------------"
 
-	_, err := selectRecipeLoop(editRecipe, instructions)
+	err := selectRecipeLoop(editRecipe, instructions)
 	if err != nil {
 		return err
 	}

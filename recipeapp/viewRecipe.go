@@ -26,7 +26,7 @@ func registerViewRecipeCommand(menu *climenus.Menu) {
 func viewRecipeLoop(args []string, menu *climenus.Menu) error {
 	instructions := "Please choose a recipe to view" +
 		"---------------------------------"
-	_, err := selectRecipeLoop(viewRecipe, instructions)
+	err := selectRecipeLoop(viewRecipe, instructions)
 	if err != nil {
 		return err
 	}
