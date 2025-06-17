@@ -87,6 +87,54 @@ func (menu *Menu) ShowMenu() error {
 	return nil
 }
 
+func renderComand(colWidths []int, columnContents []string) ([][]string, error) {
+	if len(colWidths) != len(columnContents) {
+		return nil, errors.New("number of columns does not match")
+	}
+
+	// make an empty list of lists of strings for each column
+	// after the contents of that columnn are split into rows
+	height := 0
+	n := len(colWidths)
+	formatStringArgs := make([][]string, n)
+
+	// loop through each column and generate a list of strings for that column
+	// split into separate rows of max length colWidth[i]
+	for i := 0; i < n; i++ {
+		width := colWidths[i]
+
+		s := columnContents[i]
+		var splits []string
+
+		for len(s) > 0 {
+			// if more than width remains in string, then slice up to width and add to splits
+			// and re-slice s to remove the part that was added to splits from s
+			if len(s) > width {
+				splits = append(splits, s[:width])
+				s = s[width:]
+				// if width or less remains, just add this to splits
+			} else {
+				splits = append(splits, s)
+				s = ""
+			}
+		}
+		formatStringArgs[i] = splits
+
+		height = max(height, len(splits))
+	}
+
+	// For any columns that have fewer splits than the other columns
+	// need to add empty strings at the end
+
+	for i := 0; i < n; i++ {
+		for len(formatStringArgs[i]) < height {
+			formatStringArgs[i] = append(formatStringArgs[i], "")
+		}
+	}
+
+	return formatStringArgs, nil
+}
+
 // looks up a command by the option number, and returns the command if valid option
 func (menu *Menu) CommandByOptionNumber(optionNumber int) (*Command, error) {
 	// slice is 0 indexed, but optionNumber is 1 indexed so adjust
