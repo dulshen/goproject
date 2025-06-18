@@ -17,6 +17,10 @@ const FloatType = "float"
 const ExitProgram = "exit program command issued"
 const BackCommand = "back command issued"
 
+const optionNumberColIdx = 0
+const nameColIdx = 1
+const descriptionColIdx = 2
+
 // struct representing a CLI Menu
 type Menu struct {
 	Commands    []*Command          // slice of commands for the menu (for printing in order)
@@ -61,30 +65,159 @@ func (menu *Menu) ShowMenu() error {
 	}
 	fmt.Print("\n")
 	for _, command := range menu.Commands {
-		// first add option number, name, description
-		formatStrings := []string{"%*d ", "%*s ", "%*s "}
-		args := []interface{}{menu.Columns[0].ColWidth, command.OptionNumber,
-			menu.Columns[1].ColWidth, command.Name,
-			menu.Columns[2].ColWidth, command.Description}
-		for i, additionalColumn := range command.AdditionalColumns {
-			colIdx := i + 3
-			formatString, err := menu.Columns[colIdx].typeFormatString()
-
-			if err != nil {
-				return err
-			}
-
-			formatStrings = append(formatStrings, formatString)
-			args = append(args, menu.Columns[colIdx].ColWidth)
-			args = append(args, additionalColumn)
-		}
-		formatStrings = append(formatStrings, "\n")
-
-		fmt.Printf(strings.Join(formatStrings, ""), args...)
-
+		menu.renderCommand(command)
 	}
 
 	return nil
+}
+
+// Renders the text representing a command within the menu,
+// handles formatting of command data into columns using format strings
+// and splits lines that are too long for the column width into multiple rows
+// then prints the processed text to the console.
+// Returns the resulting format strings and args used for Printf (for testing purposes)
+func (menu *Menu) renderCommand(command *Command) ([]string, [][]interface{}) {
+
+	// get splits for the command, breaking up column context into rows by column width
+	splits, height := getSplits(&menu.Columns, command)
+
+	// pad shorter splits with empty strings to match max height column
+	padWithEmptyStrings(&splits, height)
+
+	// put together the args for the format string for each column in a []interface{}
+	// (as a pair of column width, column contents for each column)
+	// so that these can be used to supply the column widths and content to Printf
+	fstringArgs := combineFstringArgs(&menu.Columns, &splits, height)
+
+	// get the format strings for each column to use for Printf
+	formatStrings, err := getFormatStrings(&menu.Columns)
+	if err != nil {
+		return nil, nil
+	}
+
+	// use the formatStrings and the args to render the text with Printf
+	for row := range height {
+		fmt.Printf(strings.Join(formatStrings, "")+"\n", fstringArgs[row]...)
+	}
+
+	return formatStrings, fstringArgs
+}
+
+// Takes the contents of the command data to be printed,
+// and splits it into multiple rows if the data for that column is longer than
+// the column width. Returns a slice of slices of strings representing these splits
+// as well as an int representing the height in rows needed for this command.
+func getSplits(columns *[]MenuColumn, command *Command) ([][]string, int) {
+	// make an empty list of lists of strings for each column
+	// after the contents of that columnn are split into rows
+	height := 0
+	n := len(*columns)
+	// formatStrings := make([][]string, n)
+
+	optionNumber := strconv.Itoa(command.OptionNumber)
+	contentsOfDefaultColumns := map[int]string{
+		optionNumberColIdx: optionNumber,
+		nameColIdx:         command.Name,
+		descriptionColIdx:  command.Description,
+	}
+
+	// TODO: add support for AdditionalColumns
+
+	splits := make([][]string, n)
+	// loop through each column and generate a list of strings for that column
+	// split into separate rows of max length colWidth[i]
+	for i := 0; i < n; i++ {
+		// for width get abs value since formatting can use negatives to indicate left justify
+		width := int(math.Abs(float64((*columns)[i].ColWidth)))
+		s := contentsOfDefaultColumns[i]
+		// break up the string into words to build splits one word at a time
+		// (prevents breaking up a word in the middle when splitting lines)
+		words := strings.Split(strings.TrimSpace(s), " ")
+
+		// empty slice to use for splits for this column
+		splits[i] = make([]string, 0)
+
+		currentWidth := 0
+		var sb strings.Builder
+		for wordNum, word := range words {
+			// if the word would exceed allowable width, then add current sb.String() as a split
+			// and start a new one
+			if len(word)+currentWidth > width {
+				splits[i] = append(splits[i], sb.String()[:len(sb.String())-1])
+				sb.Reset()
+				currentWidth = 0
+			}
+			// after checking if split is needed, write current word to sb
+			sb.WriteString(word)
+			currentWidth += len(word)
+			// if this isn't the last word, add a space
+			if wordNum < len(words)-1 {
+				sb.WriteString(" ")
+				currentWidth += 1
+			}
+
+			// if it is the last word, then just add sb so far as a new split
+			if wordNum == len(words)-1 {
+				splits[i] = append(splits[i], sb.String())
+			}
+		}
+
+		// height for the whole row should be the height of the max len split for the row
+		height = max(height, len(splits[i]))
+	}
+
+	return splits, height
+}
+
+// Gets format strings (e.g. "%*s ", "%*d ") to use in the Printf call for rendering.
+// Computes these by using the column type for each column of the menu.
+// Returns the list of format strings.
+func getFormatStrings(columns *[]MenuColumn) ([]string, error) {
+	n := len(*columns)
+	formatStrings := make([]string, n)
+
+	for i := 0; i < n; i++ {
+		typeString, err := (*columns)[i].typeFormatString()
+		if err != nil {
+			return nil, err
+		}
+		formatStrings[i] = typeString
+	}
+
+	return formatStrings, nil
+}
+
+// Pads splits in place with empty strings, based on the height in rows needed
+// for this command (i.e. the height of the largest column for this command).
+func padWithEmptyStrings(splits *[][]string, height int) {
+	n := len(*splits)
+	// For any columns that have fewer splits than the other columns
+	// need to add empty strings at the end
+	for i := 0; i < n; i++ {
+		for len((*splits)[i]) < height {
+			(*splits)[i] = append((*splits)[i], "")
+		}
+	}
+}
+
+// Combines the column widths for each column of menu with the splits containing the data
+// to display in the column, by putting these into a slice of slices of interface{}
+// so that each index in the slice of slices can be used with the ... operator
+// to function as the additional arguments in the Printf call for rendering.
+func combineFstringArgs(columns *[]MenuColumn, splits *[][]string, height int) [][]interface{} {
+	n := len(*columns)
+	// put together the args for the format string for each column in a []interface{}
+	// so that these can be used to supply the column widths and content
+	fstringArgs := make([][]interface{}, height)
+	// loop by row first instead of by column
+	for i := 0; i < height; i++ {
+		fstringArgs[i] = make([]interface{}, 0)
+		for j := 0; j < n; j++ {
+			fstringArgs[i] = append(fstringArgs[i], (*columns)[j].ColWidth, (*splits)[j][i])
+		}
+	}
+
+	return fstringArgs
 }
 
 // looks up a command by the option number, and returns the command if valid option

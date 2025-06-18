@@ -17,8 +17,8 @@ func selectRecipeLoop(executeFunc func([]string, *climenus.Menu) error, instruct
 	InitializeSelectRecipeCommands(&menu, recipes, executeFunc)
 
 	c1 := climenus.MenuColumn{ColWidth: 5, Label: "#", Type: "string"}
-	c2 := climenus.MenuColumn{ColWidth: 1, Label: "", Type: "string"}
-	c3 := climenus.MenuColumn{ColWidth: -20, Label: "Recipe Name", Type: "string"}
+	c2 := climenus.MenuColumn{ColWidth: 4, Label: "", Type: "string"}
+	c3 := climenus.MenuColumn{ColWidth: -30, Label: "Recipe Name", Type: "string"}
 
 	menu.Columns = append(menu.Columns, c1, c2, c3)
 

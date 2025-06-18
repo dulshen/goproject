@@ -1,6 +1,7 @@
 package climenus
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -250,6 +251,89 @@ func TestGetCommand(t *testing.T) {
 
 			if c.Name != tc.expected {
 				t.Errorf("got %v, expected %v", c.Name, tc.expected)
+			}
+		})
+	}
+}
+
+func TestRenderCommand(t *testing.T) {
+	testCases := []struct {
+		name                  string
+		testString            string
+		expectedFormatStrings []string
+		expectedArgs          [][]interface{}
+		dummyOptions          []struct {
+			description string
+			name        string
+		}
+	}{
+		{
+			name:       "testSplitCommandShort",
+			testString: "This is not long enough to split.",
+			expectedArgs: [][]interface{}{
+				{2, "3", 5, "test", 50, "This is not long enough to split."},
+			},
+			expectedFormatStrings: []string{
+				"%*s ",
+				"%*s ",
+				"%*s ",
+			},
+			dummyOptions: dummyMenus,
+		},
+		{
+			name: "testSplitCommandLong",
+			testString: "This line can be seen to be 50 characters long!!!! " +
+				"This line can be seen to be 50 characters long!!!! " +
+				"This line can be seen to be 50 characters long!!!! ",
+			expectedArgs: [][]interface{}{
+				{2, "3", 5, "test", 50, "This line can be seen to be 50 characters long!!!!"},
+				{2, "", 5, "", 50, "This line can be seen to be 50 characters long!!!!"},
+				{2, "", 5, "", 50, "This line can be seen to be 50 characters long!!!!"},
+				{"-", "-", "-", "-", "-", "-"},
+			},
+			expectedFormatStrings: []string{
+				"%*s ",
+				"%*s ",
+				"%*s ",
+			},
+			dummyOptions: dummyMenus,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var menu Menu
+
+			for _, option := range tc.dummyOptions {
+				c := Command{
+					Name:        option.name,
+					Description: option.description,
+				}
+				menu.AddCommand(&c)
+			}
+
+			optionNumberColumn := MenuColumn{ColWidth: 2, Type: "string", Label: "#"}
+			nameColumn := MenuColumn{ColWidth: 5, Type: "string", Label: "Name"}
+			descriptionColumn := MenuColumn{ColWidth: 50, Type: "string", Label: "Description"}
+			menu.Columns = append(menu.Columns, optionNumberColumn, nameColumn, descriptionColumn)
+
+			command := Command{OptionNumber: 3, Name: "test", Description: tc.testString}
+
+			formatStrings, fstringArgs := menu.renderCommand(&command)
+			fmt.Println(formatStrings)
+
+			for i := range len(fstringArgs) {
+				for j := range len(fstringArgs[i]) {
+					if fstringArgs[i][j] != tc.expectedArgs[i][j] {
+						t.Errorf("got %v, expected %v", fstringArgs[i][j], tc.expectedArgs[i][j])
+					}
+				}
+			}
+
+			for i := range len(formatStrings) {
+				if formatStrings[i] != tc.expectedFormatStrings[i] {
+					t.Errorf("got %v, expected %v", formatStrings[i], tc.expectedFormatStrings[i])
+				}
 			}
 		})
 	}
