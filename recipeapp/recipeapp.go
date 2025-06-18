@@ -14,6 +14,7 @@ const mainMenuInstructions = "--------------------------------------------------
 type Recipe struct {
 	Name        string       // name of the recipe
 	Ingredients []Ingredient // ingredients list
+	Steps       []string     // steps for the recipe
 }
 
 // struct describing an Ingredient

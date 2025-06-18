@@ -112,6 +112,10 @@ func initializeEditRecipeCommands(menu *climenus.Menu, recipe *Recipe) error {
 		menu.AddCommand(&climenus.Command{Name: "", Description: ingredientStr, Execute: editRecipeIngredient})
 	}
 
+	for _, step := range recipe.Steps {
+		menu.AddCommand(&climenus.Command{Name: "", Description: step, Execute: editRecipeStep})
+	}
+
 	menu.AddCommand(&climenus.Command{Name: "add", Description: "Add an Ingredient", Execute: addIngredient})
 	menu.AddCommand(&climenus.Command{Name: "save", Description: "Save Recipe", Execute: saveChanges})
 	menu.AddCommand(&climenus.Command{Name: "back", Execute: climenus.BackFunc})
@@ -168,6 +172,35 @@ func editRecipeIngredient(args []string, menu *climenus.Menu) error {
 	// re-initialize edit a recipe commands in case options changed
 	initializeEditRecipeCommands(menu, recipe)
 
+	return nil
+}
+
+// Function used when user selects to edit a recipe step.
+// Uses the provided arg to get the index of the recipe step to edit
+// then prompts the user to give new text to use for this step, and replaces
+// the old step in the recipe with this updated step.
+func editRecipeStep(args []string, menu *climenus.Menu) error {
+	recipe, _, err := extractRecipeData(menu)
+	if err != nil {
+		return err
+	}
+
+	recipeStepIdx, err := strconv.Atoi(args[0])
+	if err != nil {
+		return err
+	}
+	// ingredients start at # 2
+	// so recipeStep starts at 2 + len(ingredients)
+
+	recipeStepIdx = recipeStepIdx - len(recipe.Ingredients) - 2
+
+	prompt := "Provide new data for this recipe step:"
+	input := climenus.UserInput(prompt, recipeStepValidator)
+
+	recipe.Steps[recipeStepIdx] = input
+
+	// re-initialize edit a recipe commands in case options changed
+	initializeEditRecipeCommands(menu, recipe)
 	return nil
 }
 
