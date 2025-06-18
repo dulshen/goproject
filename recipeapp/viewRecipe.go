@@ -14,6 +14,9 @@ const viewName = "view"
 // menu description for view recipe
 const viewDescr = "View a Recipe"
 
+// max size for a row of text for recipe steps
+const maxStepLineSize = 50
+
 // Function used to register the view recipe command in the main menu
 func registerViewRecipeCommand(menu *climenus.Menu) {
 	c := climenus.Command{Name: viewName, Description: viewDescr, Execute: viewRecipeLoop}
@@ -57,6 +60,21 @@ func viewRecipe(args []string, menu *climenus.Menu) error {
 		fmt.Printf("%s: %.2f %s\n", ingredient.Name, ingredient.Quantity, ingredient.Unit)
 	}
 
+	fmt.Println("----------------------------------")
+
+	for i, recipeStep := range recipe.Steps {
+		stepSplits := getRecipeStepSplits(recipeStep, maxStepLineSize)
+		stepNo := i + 1
+		fmt.Println("--")
+		fmt.Printf("%d: ", stepNo)
+		for _, split := range stepSplits {
+			fmt.Printf("%s\n", split)
+		}
+	}
+
+	fmt.Println("--")
+	fmt.Println("----------------------------------")
+
 	fmt.Print("\n\n")
 
 	bypassValidator := func(string) (bool, error) { return true, nil }
@@ -92,4 +110,32 @@ func scaleRecipe(recipe *Recipe, multiplierString string) (string, error) {
 	}
 
 	return scaledRecipeString, nil
+}
+
+// Splits recipe step into multiple ines of console output based on the maxWidth
+// for a line of a recipe step.
+func getRecipeStepSplits(step string, maxWidth int) []string {
+	// extracts words from the recipe step string, so that splits can be broken
+	// such that a word is not broken up in the middle
+	words := strings.Split(step, " ")
+	splits := make([]string, 0)
+	var sb strings.Builder
+
+	currentWidth := 0
+	for i, word := range words {
+		if len(word)+currentWidth >= maxWidth {
+			currentWidth = 0
+			splits = append(splits, sb.String())
+			sb.Reset()
+		}
+		sb.WriteString(word)
+		currentWidth += len(word)
+		if i < len(words)-1 {
+			sb.WriteString(" ")
+		} else {
+			splits = append(splits, sb.String())
+		}
+	}
+
+	return splits
 }

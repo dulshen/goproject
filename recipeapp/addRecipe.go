@@ -13,6 +13,9 @@ import (
 // max allowed length for a recipe name
 const maxRecipeNameLength = 50
 
+// max allowed length for a recipe step
+const maxStepLength = 250
+
 // const jsonFileName = "../data/recipes.json"
 
 // Function used toe register the add recipe command to the main menu
@@ -38,7 +41,7 @@ func recipeNameValidator(input string) (bool, error) {
 // Checks that the comma delimited list is the correct length for ingredient, quantity
 // or ingredient, quantity, unit, and checks that the quantity can be pasrsed as a float
 func ingredientValidator(input string) (bool, error) {
-	if input == saveRecipeInput || input == undoIngredientInput {
+	if input == doneInput || input == undoIngredientInput {
 		if input == undoIngredientInput {
 			fmt.Println("last ingredient removed.")
 		}
@@ -59,6 +62,19 @@ func ingredientValidator(input string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+// Validator used for recipe steps. As of now this just
+// checks that the length of the step is less than the max allowed.
+func recipeStepValidator(s string) (bool, error) {
+	if len(s) < maxStepLength {
+		return true, nil
+	}
+
+	return false, fmt.Errorf(
+		"step must be no more than %d characters",
+		maxRecipeNameLength,
+	)
 }
 
 // Parses an Ingredient struct from ingredient text input from the user
@@ -83,6 +99,9 @@ func parseIngredient(ingredientString string) (Ingredient, error) {
 
 // command for saving a recipe
 const saveRecipeInput = "save"
+
+// command for done adding ingredients
+const doneInput = "done"
 
 // commmand for undoing an added ingredient
 const undoIngredientInput = "undo"
@@ -116,9 +135,12 @@ func AddRecipeLoop(args []string, menu *climenus.Menu) error {
 		ingredientsList = append(ingredientsList, ingredient)
 	}
 
+	recipeStepStrings := getRecipeStepsInput()
+
 	recipe := Recipe{
 		Name:        recipeName,
 		Ingredients: ingredientsList,
+		Steps:       recipeStepStrings,
 	}
 
 	err := saveRecipe(&recipe)
@@ -134,17 +156,35 @@ func AddRecipeLoop(args []string, menu *climenus.Menu) error {
 
 }
 
+func getRecipeStepsInput() []string {
+	prompt := "\nPlease add recipe steps 1 step at a time, enter done when done"
+
+	input := ""
+	recipeStepStrings := make([]string, 0)
+
+	for input != doneInput {
+
+		input = climenus.UserInput(prompt, recipeStepValidator)
+		if input != doneInput {
+			recipeStepStrings = append(recipeStepStrings, input)
+		}
+	}
+
+	return recipeStepStrings
+
+}
+
 // Function used to get user input for ingredients for the recipe.
 // Loops through user input ingredients, validates that each user input can be parsed as an ingredient,
 // then returns the slice of ingredient strings
 func getIngredientsInput() []string {
 	prompt := "\nPlease enter recipe ingredients in the following format:"
 	prompt += "Ingredient name, ingredient quantity, ingredient unit\n"
-	prompt += "(enter 'save' to save recipe once done, enter 'undo' to remove last added ingredient)"
+	prompt += "(enter 'done' once done, enter 'undo' to remove last added ingredient)"
 
 	input := ""
 	ingredientStrings := make([]string, 0)
-	for input != saveRecipeInput {
+	for input != doneInput {
 
 		input = climenus.UserInput(prompt, ingredientValidator)
 		if input == undoIngredientInput {
@@ -153,7 +193,7 @@ func getIngredientsInput() []string {
 				ingredientStrings = ingredientStrings[:n-1]
 				fmt.Println("removed last ingredient")
 			}
-		} else if input != saveRecipeInput {
+		} else if input != doneInput {
 			ingredientStrings = append(ingredientStrings, input)
 		}
 	}
